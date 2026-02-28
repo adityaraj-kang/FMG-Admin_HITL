@@ -189,7 +189,7 @@ const customerNames = [
   'Samantha Green', 'Nathan Adams', 'Kayla Baker', 'Christian Nelson', 'Amber Carter',
 ]
 
-const vendorPools: Record<string, string[]> = {
+const vendorPools: Record<ServiceType, string[]> = {
   'Towing':     ['City Towing Services', 'RoadSide Heroes', 'TowMaster Pro', 'Eagle Towing', 'Highway Helper', 'RapidTow Inc'],
   'Plumbing':   ['QuickFix Plumbing', 'PipeWorks Inc', 'FlowRight Plumbing', 'HydroFix Plumbing', 'ClearFlow Plumbing', 'DrainPro Plumbing'],
   'HVAC':       ['ProHVAC Solutions', 'CoolAir Systems', 'Arctic HVAC', 'ClimateControl Pro', 'ComfortZone HVAC', 'FreezePoint HVAC'],

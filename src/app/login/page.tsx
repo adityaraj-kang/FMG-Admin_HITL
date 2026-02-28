@@ -103,14 +103,13 @@ export default function LoginPage() {
           padding: '0 24px',
         }}
       >
-        {/* Fix 6 — next/image; Fix 3 — logo-img logo-pulse classes, no inline filter */}
         <Image
-          src="/fmg-logo.png"
+          src="/Full-logo-webisite.png"
           alt="Find My Genie"
           width={0}
           height={32}
           style={{ width: 'auto', height: '32px' }}
-          className="logo-img logo-pulse"
+          priority
         />
         <ThemeToggle />
       </header>

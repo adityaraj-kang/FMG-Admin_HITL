@@ -27,13 +27,12 @@ export function Header() {
       >
         <div className="flex items-center gap-1">
           <Image
-            src="/fmg-logo.png"
+            src="/Full-logo-webisite.png"
             alt="Find My Genie"
             width={0}
             height={32}
             sizes="auto"
             style={{ width: 'auto', height: '32px' }}
-            className="logo-img logo-pulse"
             priority
           />
         </div>

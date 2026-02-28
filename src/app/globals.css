@@ -2,26 +2,198 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── DARK THEME (default) ─── */
+:root,
+[data-theme="dark"] {
+  --bg-default:    #050505;
+  --bg-surface:    #121212;
+  --bg-input:      #1A1A1A;
+  --border-subtle: #333333;
+  --border-strong: #555555;
+
+  --primary-main:  #FF4D00;
+  --primary-hover: #FF6A2B;
+  --primary-dim:   rgba(77, 23, 0, 0.15);
+
+  --text-primary:  #EDEDED;
+  --text-body:     #A1A1A1;
+  --text-muted:    #666666;
+
+  --status-success: #00E096;
+  --status-error:   #FF2D55;
+  --status-warning: #FFC043;
+  --status-info:    #2E93FA;
+
+  --scrollbar-track: #1A1A1A;
+  --scrollbar-thumb: #333333;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── LIGHT THEME ─── */
+[data-theme="light"] {
+  --bg-default:    #F4F5F7;
+  --bg-surface:    #FFFFFF;
+  --bg-input:      #F0F2F5;
+  --border-subtle: #E2E4E8;
+  --border-strong: #C4C8D0;
+
+  --primary-main:  #FF4D00;
+  --primary-hover: #FF6A2B;
+  --primary-dim:   rgba(255, 77, 0, 0.08);
+
+  --text-primary:  #111111;
+  --text-body:     #4A5568;
+  --text-muted:    #94A3B8;
+
+  --status-success: #00C07A;
+  --status-error:   #E5002B;
+  --status-warning: #D97706;
+  --status-info:    #1A7FD4;
+
+  --scrollbar-track: #F0F2F5;
+  --scrollbar-thumb: #C4C8D0;
+}
+
+/* ─── BASE RESET ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-default);
+  color: var(--text-primary);
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 300ms cubic-bezier(0.2, 0, 0.38, 0.9),
+              color 300ms cubic-bezier(0.2, 0, 0.38, 0.9);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* ─── CUSTOM SCROLLBAR ─── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ─── FOCUS RING ─── */
+:focus-visible {
+  outline: 2px solid var(--primary-main);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+}
+
+/* ─── TYPOGRAPHY HELPERS ─── */
+.font-headline { font-family: var(--font-outfit), sans-serif; }
+.font-body     { font-family: var(--font-plus-jakarta), sans-serif; }
+.font-mono-custom { font-family: var(--font-jetbrains), monospace; }
+
+/* ─── TRANSITIONS ON THEME SWITCH ─── */
+* {
+  transition-property: background-color, border-color, color;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.38, 0.9);
+  transition-duration: 150ms;
+}
+
+/* Reset for elements that shouldn't animate on every interaction */
+button, a, input, textarea, select {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.38, 0.9);
+  transition-duration: 150ms;
+}
+
+/* ─── INPUT FOCUS STYLES ─── */
+input:focus-visible {
+  outline: none;
+  border-color: var(--primary-main) !important;
+  box-shadow: 0 0 0 1px var(--primary-main);
+}
+
+/* ─── BUTTON PRIMARY ─── */
+.btn-primary:hover { background-color: var(--primary-hover) !important; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Terminal grid background */
+.terminal-grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 77, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 77, 0, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Scanline overlay */
+.scanline-overlay {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(transparent, rgba(255, 77, 0, 0.04), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes scanline {
+  from { top: -100px; }
+  to { top: 100vh; }
+}
+
+/* Shake animation */
+.animate-shake {
+  animation: shake 300ms cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+
+/* OpenType font features */
+* { font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'tnum' 1, 'zero' 1; }
+.font-headline { font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1, 'ss02' 1; }
+
+/* Logo image filters for theme */
+[data-theme="dark"] .logo-img { filter: grayscale(1) brightness(1.5); }
+[data-theme="light"] .logo-img { filter: grayscale(1) brightness(0.1); }
+
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.9; }
+}
+.logo-pulse {
+  animation: logo-pulse 3s ease-in-out infinite;
 }

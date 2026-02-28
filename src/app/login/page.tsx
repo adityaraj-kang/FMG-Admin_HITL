@@ -1,17 +1,35 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { motion, useAnimate } from 'framer-motion'
 import { Warning } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
-import { useTheme } from '@/context/ThemeContext'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+
+// Fix 7 — Framer Motion variants at module scope
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: [0.2, 0, 0.38, 0.9] as const },
+  },
+}
 
 export default function LoginPage() {
   const router = useRouter()
   const { isAuthenticated, login } = useAuth()
-  const { theme } = useTheme()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -50,29 +68,6 @@ export default function LoginPage() {
     }
   }
 
-  const logoFilter =
-    theme === 'dark'
-      ? 'grayscale(1) brightness(1.5)'
-      : 'grayscale(1) brightness(0.1)'
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3, ease: [0.2, 0, 0.38, 0.9] as const },
-    },
-  }
-
   return (
     <div
       style={{
@@ -84,47 +79,11 @@ export default function LoginPage() {
         flexDirection: 'column',
       }}
     >
-      {/* Inline keyframes for scanline and shake */}
-      <style>{`
-        @keyframes scanline {
-          from { top: -100px; }
-          to   { top: 100vh; }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%       { transform: translateX(-6px); }
-          40%       { transform: translateX(6px); }
-          60%       { transform: translateX(-4px); }
-          80%       { transform: translateX(4px); }
-        }
-      `}</style>
+      {/* Fix 3 — Terminal grid background via CSS class, no inline background styles */}
+      <div className="terminal-grid-bg" />
 
-      {/* Terminal grid background */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: -1,
-          pointerEvents: 'none',
-          backgroundImage:
-            'linear-gradient(rgba(255,77,0,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,77,0,0.08) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
-
-      {/* Scanline effect */}
-      <div
-        style={{
-          position: 'fixed',
-          left: 0,
-          width: '100%',
-          height: '100px',
-          pointerEvents: 'none',
-          zIndex: 1,
-          background: 'linear-gradient(transparent, rgba(255,77,0,0.04), transparent)',
-          animation: 'scanline 8s linear infinite',
-        }}
-      />
+      {/* Fix 3 — Scanline effect via CSS class */}
+      <div className="scanline-overlay" aria-hidden="true" />
 
       {/* Sticky header */}
       <header
@@ -141,10 +100,14 @@ export default function LoginPage() {
           padding: '0 24px',
         }}
       >
-        <img
+        {/* Fix 6 — next/image; Fix 3 — logo-img logo-pulse classes, no inline filter */}
+        <Image
           src="/fmg-logo.png"
           alt="Find My Genie"
-          style={{ height: 32, filter: logoFilter }}
+          width={0}
+          height={32}
+          style={{ width: 'auto', height: '32px' }}
+          className="logo-img logo-pulse"
         />
         <ThemeToggle />
       </header>
@@ -167,7 +130,7 @@ export default function LoginPage() {
             initial="hidden"
             animate="visible"
           >
-            {/* Heading */}
+            {/* Fix 8 — "Welcome Back" with CSS textTransform, not hardcoded uppercase */}
             <motion.h1
               variants={itemVariants}
               className="font-headline"
@@ -179,7 +142,7 @@ export default function LoginPage() {
                 margin: 0,
               }}
             >
-              WELCOME BACK
+              Welcome Back
             </motion.h1>
 
             {/* Subtitle */}
@@ -224,6 +187,7 @@ export default function LoginPage() {
                     >
                       EMAIL ADDRESS
                     </label>
+                    {/* Fix 4 — no onFocus/onBlur handlers; focus styles handled by CSS */}
                     <input
                       id="email"
                       type="email"
@@ -241,17 +205,8 @@ export default function LoginPage() {
                         borderRadius: '8px',
                         color: 'var(--text-primary)',
                         fontSize: '15px',
-                        outline: 'none',
                         transition: 'border-color 150ms, box-shadow 150ms',
                         boxSizing: 'border-box',
-                      }}
-                      onFocus={e => {
-                        e.currentTarget.style.borderColor = 'var(--primary-main)'
-                        e.currentTarget.style.boxShadow = '0 0 0 1px var(--primary-main)'
-                      }}
-                      onBlur={e => {
-                        e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                        e.currentTarget.style.boxShadow = 'none'
                       }}
                     />
                   </div>
@@ -279,19 +234,31 @@ export default function LoginPage() {
                       >
                         PASSWORD
                       </label>
-                      <span
+                      {/* Fix 2 — keyboard-accessible <button> replaces <span> */}
+                      <button
+                        type="button"
+                        onClick={() => {}}
                         style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
                           color: 'var(--primary-main)',
                           fontSize: '11px',
-                          fontFamily: 'var(--font-jetbrains), monospace',
-                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          textDecoration: 'none',
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
-                        onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.textDecoration = 'underline'
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.textDecoration = 'none'
+                        }}
                       >
                         Forgot?
-                      </span>
+                      </button>
                     </div>
+                    {/* Fix 4 — no onFocus/onBlur handlers; focus styles handled by CSS */}
                     <input
                       id="password"
                       type="password"
@@ -309,24 +276,16 @@ export default function LoginPage() {
                         borderRadius: '8px',
                         color: 'var(--text-primary)',
                         fontSize: '15px',
-                        outline: 'none',
                         transition: 'border-color 150ms, box-shadow 150ms',
                         boxSizing: 'border-box',
-                      }}
-                      onFocus={e => {
-                        e.currentTarget.style.borderColor = 'var(--primary-main)'
-                        e.currentTarget.style.boxShadow = '0 0 0 1px var(--primary-main)'
-                      }}
-                      onBlur={e => {
-                        e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                        e.currentTarget.style.boxShadow = 'none'
                       }}
                     />
                   </div>
 
-                  {/* Error banner */}
+                  {/* Fix 5 — role="alert" so screen readers announce errors */}
                   {error && (
                     <div
+                      role="alert"
                       style={{
                         backgroundColor: 'rgba(255,45,85,0.08)',
                         border: '1px solid rgba(255,45,85,0.2)',
@@ -351,12 +310,13 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  {/* Sign In button */}
+                  {/* Fix 4 — btn-primary class handles hover/disabled; remove onMouseEnter/Leave */}
                   <motion.button
                     type="submit"
                     disabled={isLoading}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.1, ease: [0.2, 0, 0.38, 0.9] }}
+                    className="btn-primary"
                     style={{
                       width: '100%',
                       height: '48px',
@@ -375,14 +335,6 @@ export default function LoginPage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '4px',
-                    }}
-                    onMouseEnter={e => {
-                      if (!isLoading) {
-                        e.currentTarget.style.backgroundColor = 'var(--primary-hover)'
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = 'var(--primary-main)'
                     }}
                   >
                     {isLoading ? (

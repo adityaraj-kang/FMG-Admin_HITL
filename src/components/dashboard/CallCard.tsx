@@ -39,6 +39,9 @@ export function CallCard({ call }: CallCardProps) {
   const ServiceIcon = serviceIconMap[call.serviceType]
   const isUrgent = call.status === 'Attention Needed' || call.status === 'Escalated'
   const { agent: currentAgent } = useAuth()
+  const assignedAgent = call.assignedAgentId
+    ? (MOCK_AGENTS.find(a => a.id === call.assignedAgentId) ?? null)
+    : null
 
   return (
     <motion.div
@@ -132,53 +135,29 @@ export function CallCard({ call }: CallCardProps) {
 
       {/* Assignee Row */}
       {currentAgent && (
-        <div style={{
-          borderTop: '1px solid var(--border-subtle)',
-          paddingTop: 8,
-          marginTop: 8,
-        }}>
+        <div className="border-t border-[var(--border-subtle)] pt-2 mt-2">
           {call.assignedAgentId === currentAgent.id ? (
             // State 1: MY CALL
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              fontFamily: 'var(--font-jetbrains)', fontSize: 10,
-              fontWeight: 700, textTransform: 'uppercase',
-              letterSpacing: '0.08em', color: 'var(--primary-main)'
-            }}>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--primary-main)]">
               ★ MY CALL
-            </div>
-          ) : call.assignedAgentId ? (
+            </span>
+          ) : assignedAgent ? (
             // State 2: Assigned to another agent
-            (() => {
-              const assignedAgent = MOCK_AGENTS.find(a => a.id === call.assignedAgentId)
-              if (!assignedAgent) return null
-              return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <AgentAvatar agent={assignedAgent} size="sm" />
-                  <span style={{
-                    fontFamily: 'var(--font-jetbrains)', fontSize: 10,
-                    color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {assignedAgent.name}
-                  </span>
-                </div>
-              )
-            })()
+            <div className="flex items-center gap-1.5">
+              <AgentAvatar agent={assignedAgent} size="sm" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-[var(--text-muted)] truncate">
+                {assignedAgent.name}
+              </span>
+            </div>
           ) : (
             // State 3: Unassigned
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '2px 6px',
-              background: 'rgba(255, 77, 0, 0.1)',
-              border: '1px solid rgba(255, 77, 0, 0.3)',
-              borderRadius: 4,
-              fontFamily: 'var(--font-jetbrains)', fontSize: 10,
-              fontWeight: 600, color: 'var(--primary-main)',
-              textTransform: 'uppercase', letterSpacing: '0.06em'
-            }}>
+            <span className={cn(
+              'inline-flex items-center gap-1 px-1.5 py-0.5 rounded',
+              'font-mono text-[10px] uppercase tracking-[0.06em] font-semibold',
+              'bg-[rgba(255,77,0,0.1)] text-[var(--primary-main)] border border-[rgba(255,77,0,0.3)]'
+            )}>
               ⚡ Unassigned
-            </div>
+            </span>
           )}
         </div>
       )}

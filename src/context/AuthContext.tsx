@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { Agent, MOCK_AGENTS } from '@/lib/mockAgents'
 
 interface AuthContextValue {
@@ -21,7 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem('fmg-agent')
       if (stored) {
         const parsed = JSON.parse(stored) as Agent
-        setAgent(parsed)
+        const valid = MOCK_AGENTS.find(a => a.id === parsed.id)
+        if (valid) setAgent(valid)
       }
     } catch {
       // parse failed — leave agent as null
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMounted(true)
   }, [])
 
-  const login = async (
+  const login = useCallback(async (
     email: string,
     password: string
   ): Promise<{ success: boolean; error?: string }> => {
@@ -40,18 +41,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     )
 
     if (found) {
-      localStorage.setItem('fmg-agent', JSON.stringify(found))
+      const { password: _password, ...safeAgent } = found
+      localStorage.setItem('fmg-agent', JSON.stringify(safeAgent))
       setAgent(found)
       return { success: true }
     }
 
     return { success: false, error: 'Invalid email or password' }
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('fmg-agent')
     setAgent(null)
-  }
+  }, [])
 
   if (!mounted) return null
 

@@ -35,6 +35,7 @@ export function AgentAvatar({ agent, size = 'sm' }: AgentAvatarProps) {
           lineHeight: 1,
           letterSpacing: '0.02em',
           userSelect: 'none',
+          textTransform: 'uppercase',
         }}
       >
         {agent.initials}

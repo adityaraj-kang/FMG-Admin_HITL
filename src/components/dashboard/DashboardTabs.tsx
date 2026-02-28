@@ -27,16 +27,19 @@ export function DashboardTabs({
   ]
 
   return (
-    <div className="flex items-center gap-0 border-b border-[var(--border-subtle)] px-6 bg-bg-surface">
+    <div role="tablist" className="flex items-center gap-0 border-b border-[var(--border-subtle)] px-6 bg-bg-surface">
       {tabs.map(tab => (
         <button
           key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
             'relative flex items-center gap-2 px-4 py-4',
             'font-body text-sm font-medium',
             'transition-colors duration-fast',
-            'focus-visible:outline-none',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-main)] focus-visible:ring-inset',
             activeTab === tab.id
               ? 'text-[var(--text-primary)]'
               : 'text-[var(--text-muted)] hover:text-[var(--text-body)]'

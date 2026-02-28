@@ -1,55 +1,128 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import { Header } from '@/components/layout/Header'
 import { DashboardTabs } from '@/components/dashboard/DashboardTabs'
-import { CallCardGrid } from '@/components/dashboard/CallCardGrid'
-import { CallCard } from '@/components/dashboard/CallCard'
-import { mockCalls } from '@/lib/mockData'
+import { FilterToolbar, CallFilters, DEFAULT_FILTERS } from '@/components/dashboard/FilterToolbar'
+import { VirtualCallGrid } from '@/components/dashboard/VirtualCallGrid'
+import { mockCalls, getAttentionCalls, getMyQueueCalls } from '@/lib/mockData'
+import { cn } from '@/utils/cn'
 
 type TabId = 'all' | 'attention' | 'mine'
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<TabId>('all')
+// ─── StatPill ─────────────────────────────────────────────────────────────────
 
-  const attentionCalls = mockCalls.filter(
-    c => c.status === 'Attention Needed' || c.status === 'Escalated'
+function StatPill({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className={cn(
+        'font-mono text-[11px] font-bold',
+        highlight ? 'text-[var(--status-warning)]' : 'text-[var(--text-primary)]'
+      )}>
+        {value.toLocaleString()}
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        {label}
+      </span>
+    </div>
+  )
+}
+
+// ─── DashboardPage ────────────────────────────────────────────────────────────
+
+export default function DashboardPage() {
+  const { agent } = useAuth()
+  const [activeTab, setActiveTab] = useState<TabId>('all')
+  const [filters, setFilters] = useState<CallFilters>(DEFAULT_FILTERS)
+
+  // ── Derived data ────────────────────────────────────────────────────────────
+
+  const attentionCalls = useMemo(() => getAttentionCalls(), [])
+  const myQueueCalls = useMemo(
+    () => (agent ? getMyQueueCalls(agent.id) : []),
+    [agent]
   )
 
-  // TODO (Task 13): filter by 'mine' using getMyQueueCalls(agent.id) when activeTab === 'mine'
-  const displayedCalls = activeTab === 'attention' ? attentionCalls : mockCalls
+  const filteredCalls = useMemo(() => {
+    // 1. Start with the right base set based on tab
+    let base =
+      activeTab === 'attention'
+        ? attentionCalls
+        : activeTab === 'mine'
+        ? myQueueCalls
+        : mockCalls
+
+    // 2. Apply search filter (case-insensitive, matches userName, vendorName, location)
+    if (filters.search.trim()) {
+      const query = filters.search.toLowerCase()
+      base = base.filter(
+        c =>
+          c.userName?.toLowerCase().includes(query) ||
+          c.vendorName?.toLowerCase().includes(query) ||
+          c.location?.toLowerCase().includes(query)
+      )
+    }
+
+    // 3. Apply status filter
+    if (filters.status !== 'all') {
+      base = base.filter(c => c.status === filters.status)
+    }
+
+    // 4. Apply service filter
+    if (filters.service !== 'all') {
+      base = base.filter(c => c.serviceType === filters.service)
+    }
+
+    // 5. Apply urgency filter
+    if (filters.urgency !== 'all') {
+      base = base.filter(c => c.urgencyLevel === filters.urgency)
+    }
+
+    return base
+  }, [activeTab, filters, attentionCalls, myQueueCalls])
+
+  // ── Layout ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-bg-default">
+    <div className="flex flex-col h-screen bg-bg-default overflow-hidden">
       <Header />
 
-      {/* Page header */}
-      <div className="px-6 pt-6 pb-0">
-        <h1 className="font-headline text-2xl font-semibold text-[var(--text-primary)] mb-1">
-          Operations Center
-        </h1>
-        <p className="font-mono text-xs text-[var(--text-muted)] tracking-wider uppercase">
-          {mockCalls.length} active calls · {attentionCalls.length} need attention
-        </p>
-      </div>
+      {/* Flex-none section: tabs + filter toolbar + stats bar */}
+      <div className="flex-none">
+        {/* Terminal grid background for the whole page */}
+        <div className="terminal-grid-bg" />
 
-      {/* Tabs */}
-      <div className="mt-6">
+        {/* Tabs */}
         <DashboardTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           allCount={mockCalls.length}
           attentionCount={attentionCalls.length}
-          myQueueCount={0}
+          myQueueCount={myQueueCalls.length}
         />
+
+        {/* Filter toolbar */}
+        <FilterToolbar filters={filters} onChange={setFilters} />
+
+        {/* Stats bar */}
+        <div className="flex items-center gap-6 px-6 py-2 border-b border-[var(--border-subtle)] bg-bg-surface">
+          <StatPill label="Total Active" value={mockCalls.length} />
+          <StatPill label="Need Attention" value={attentionCalls.length} highlight={attentionCalls.length > 0} />
+          <StatPill label="My Queue" value={myQueueCalls.length} />
+          {filteredCalls.length !== mockCalls.length && (
+            <StatPill label="Filtered" value={filteredCalls.length} />
+          )}
+        </div>
       </div>
 
-      {/* Card grid */}
-      <CallCardGrid empty={displayedCalls.length === 0}>
-        {displayedCalls.map(call => (
-          <CallCard key={call.id} call={call} />
-        ))}
-      </CallCardGrid>
+      {/* Virtualized call grid — flex-1 so it fills remaining height */}
+      <div className="flex-1 min-h-0">
+        <VirtualCallGrid
+          calls={filteredCalls}
+          currentAgentId={agent?.id ?? ''}
+        />
+      </div>
     </div>
   )
 }

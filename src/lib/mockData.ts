@@ -157,27 +157,6 @@ const detailedTranscript: TranscriptEntry[] = [
   },
 ]
 
-const shortTranscript = (speakerA: string, speakerB: string, minutesAgo: number): TranscriptEntry[] => [
-  {
-    id: `${speakerA}-t1`,
-    timestamp: new Date(now - minutesAgo * 60 * 1000).toISOString(),
-    speaker: 'Agent',
-    text: `Hi, calling from Find My Genie. I'm reaching out about a service request we have. Is ${speakerB} available to help?`,
-  },
-  {
-    id: `${speakerA}-t2`,
-    timestamp: new Date(now - (minutesAgo - 0.5) * 60 * 1000).toISOString(),
-    speaker: 'Vendor',
-    text: "Yes, we're available. What do you need?",
-  },
-  {
-    id: `${speakerA}-t3`,
-    timestamp: new Date(now - (minutesAgo - 1) * 60 * 1000).toISOString(),
-    speaker: 'Agent',
-    text: "I need to get a quote and confirm availability. Can you give me your best price and ETA?",
-  },
-]
-
 // ─── Named const for the detailed demo call ────────────────────────────────────
 
 const CALL_001: CallRecord = {
@@ -210,16 +189,13 @@ const customerNames = [
   'Samantha Green', 'Nathan Adams', 'Kayla Baker', 'Christian Nelson', 'Amber Carter',
 ]
 
-const vendorNames = [
-  'QuickFix Plumbing', 'City Towing Services', 'ProHVAC Solutions', 'FastLock & Key',
-  'Metro Electrical Co', 'RoadSide Heroes', 'PipeWorks Inc', 'CoolAir Systems',
-  'PowerLine Electric', 'KeyMaster Locksmith', 'TowMaster Pro', 'FlowRight Plumbing',
-  'Arctic HVAC', 'Spark Electrical', 'SafeLock Services', 'HydroFix Plumbing',
-  'Eagle Towing', 'ClimateControl Pro', 'Bright Spark Electric', 'InstantKey Solutions',
-  'Highway Helper', 'ClearFlow Plumbing', 'ComfortZone HVAC', 'PowerUp Electric',
-  'KeyQuick Locksmith', 'RapidTow Inc', 'DrainPro Plumbing', 'FreezePoint HVAC',
-  'WireWise Electrical', 'OpenSesame Locks',
-]
+const vendorPools: Record<string, string[]> = {
+  'Towing':     ['City Towing Services', 'RoadSide Heroes', 'TowMaster Pro', 'Eagle Towing', 'Highway Helper', 'RapidTow Inc'],
+  'Plumbing':   ['QuickFix Plumbing', 'PipeWorks Inc', 'FlowRight Plumbing', 'HydroFix Plumbing', 'ClearFlow Plumbing', 'DrainPro Plumbing'],
+  'HVAC':       ['ProHVAC Solutions', 'CoolAir Systems', 'Arctic HVAC', 'ClimateControl Pro', 'ComfortZone HVAC', 'FreezePoint HVAC'],
+  'Electrical': ['Metro Electrical Co', 'PowerLine Electric', 'Spark Electrical', 'Bright Spark Electric', 'PowerUp Electric', 'WireWise Electrical'],
+  'Locksmith':  ['FastLock & Key', 'KeyMaster Locksmith', 'SafeLock Services', 'InstantKey Solutions', 'KeyQuick Locksmith', 'OpenSesame Locks'],
+}
 
 const locations = [
   'Austin, TX', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX', 'Phoenix, AZ',
@@ -291,10 +267,14 @@ function formatDuration(elapsedMs: number): string {
 }
 
 // Seeded pseudo-random number (deterministic so server/client match)
-function seededRand(seed: number, offset = 0): number {
-  // Simple LCG
-  const x = ((seed + offset) * 1664525 + 1013904223) & 0xffffffff
-  return (x >>> 0) / 0xffffffff
+// Uses an integer hash mixing function (Murmur-inspired) that treats (seed, offset)
+// as a 2D hash input, producing independent streams for each offset value.
+function seededRand(seed: number, offset: number): number {
+  let h = (seed * 2654435761 + offset * 40503) >>> 0
+  h ^= h >>> 16
+  h = Math.imul(h, 0x45d9f3b) >>> 0
+  h ^= h >>> 16
+  return (h >>> 0) / 0x100000000
 }
 
 function generateMockCalls(count: number): CallRecord[] {
@@ -316,9 +296,10 @@ function generateMockCalls(count: number): CallRecord[] {
 
     // Pick fields from pools
     const userName = customerNames[Math.floor(r0 * customerNames.length)]
-    const vendorName = vendorNames[Math.floor(r1 * vendorNames.length)]
     const location = locations[Math.floor(r2 * locations.length)]
     const serviceType = serviceTypes[i % serviceTypes.length]   // cycle through service types
+    const pool = vendorPools[serviceType]
+    const vendorName = pool[Math.floor(r1 * pool.length)]
 
     // Urgency: ~20% critical, ~30% high, ~35% medium, ~15% low
     let urgencyLevel: UrgencyLevel

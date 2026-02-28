@@ -100,9 +100,6 @@ export default function DashboardPage() {
 
       {/* Flex-none section: tabs + filter toolbar + stats bar */}
       <div className="flex-none">
-        {/* Terminal grid background for the whole page */}
-        <div className="terminal-grid-bg" />
-
         {/* Tabs */}
         <DashboardTabs
           activeTab={activeTab}

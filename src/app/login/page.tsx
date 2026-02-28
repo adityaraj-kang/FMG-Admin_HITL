@@ -82,12 +82,6 @@ export default function LoginPage() {
         flexDirection: 'column',
       }}
     >
-      {/* Fix 3 — Terminal grid background via CSS class, no inline background styles */}
-      <div className="terminal-grid-bg" />
-
-      {/* Fix 3 — Scanline effect via CSS class */}
-      <div className="scanline-overlay" aria-hidden="true" />
-
       {/* Sticky header */}
       <header
         style={{

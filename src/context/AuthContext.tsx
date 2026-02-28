@@ -22,7 +22,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (stored) {
         const parsed = JSON.parse(stored) as Agent
         const valid = MOCK_AGENTS.find(a => a.id === parsed.id)
-        if (valid) setAgent(valid)
+        if (valid) {
+          // Strip password before storing in React state
+          const { password: _pwd, ...safeValid } = valid
+          setAgent(safeValid as Agent)
+        }
       }
     } catch {
       // parse failed — leave agent as null
@@ -43,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (found) {
       const { password: _password, ...safeAgent } = found
       localStorage.setItem('fmg-agent', JSON.stringify(safeAgent))
-      setAgent(found)
+      setAgent(safeAgent as Agent)   // password stripped — never reaches React context
       return { success: true }
     }
 

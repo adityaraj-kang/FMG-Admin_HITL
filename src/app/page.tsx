@@ -44,6 +44,16 @@ export default function DashboardPage() {
     [agent]
   )
 
+  // True when any filter deviates from defaults (search, status, service, or urgency)
+  const isFilterActive = useMemo(
+    () =>
+      filters.search.trim() !== '' ||
+      filters.status !== 'all' ||
+      filters.service !== 'all' ||
+      filters.urgency !== 'all',
+    [filters]
+  )
+
   const filteredCalls = useMemo(() => {
     // 1. Start with the right base set based on tab
     let base =
@@ -110,14 +120,19 @@ export default function DashboardPage() {
           <StatPill label="Total Active" value={mockCalls.length} />
           <StatPill label="Need Attention" value={attentionCalls.length} highlight={attentionCalls.length > 0} />
           <StatPill label="My Queue" value={myQueueCalls.length} />
-          {filteredCalls.length !== mockCalls.length && (
+          {isFilterActive && (
             <StatPill label="Filtered" value={filteredCalls.length} />
           )}
         </div>
       </div>
 
       {/* Virtualized call grid — flex-1 so it fills remaining height */}
-      <div className="flex-1 min-h-0">
+      <div
+        role="tabpanel"
+        id="tabpanel-calls"
+        aria-labelledby={`tab-${activeTab}`}
+        className="flex-1 min-h-0"
+      >
         <VirtualCallGrid
           calls={filteredCalls}
           currentAgentId={agent?.id ?? ''}

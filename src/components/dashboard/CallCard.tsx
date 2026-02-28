@@ -55,8 +55,7 @@ export function CallCard({ call }: CallCardProps) {
         'card-glow-hover',
         isUrgent
           ? 'border-[var(--status-warning)] border-l-4 border-l-[var(--status-warning)]'
-          : 'border-border-subtle hover:border-border-strong',
-        '[data-theme="light"] &:shadow-card-light hover:shadow-card-elevated'
+          : 'border-border-subtle hover:border-border-strong'
       )}
     >
       {/* Top row: service icon + status badge */}

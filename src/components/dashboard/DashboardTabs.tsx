@@ -20,8 +20,10 @@ export function DashboardTabs({
   attentionCount,
   myQueueCount,
 }: DashboardTabsProps) {
+  // "All Calls" — label is intentionally broad; the tab shows all statuses (Active, Escalated,
+  // Attention Needed) so "All Active Calls" would be misleading.
   const tabs: { id: TabId; label: string; count: number; urgent?: boolean }[] = [
-    { id: 'all', label: 'All Active Calls', count: allCount },
+    { id: 'all', label: 'All Calls', count: allCount },
     { id: 'attention', label: 'Needs Attention', count: attentionCount, urgent: true },
     { id: 'mine', label: 'My Queue', count: myQueueCount },
   ]
@@ -31,9 +33,11 @@ export function DashboardTabs({
       {tabs.map(tab => (
         <button
           key={tab.id}
+          id={`tab-${tab.id}`}
           type="button"
           role="tab"
           aria-selected={activeTab === tab.id}
+          aria-controls="tabpanel-calls"
           onClick={() => onTabChange(tab.id)}
           className={cn(
             'relative flex items-center gap-2 px-4 py-4',

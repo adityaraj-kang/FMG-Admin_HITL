@@ -57,14 +57,17 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
-    const result = await login(email, password)
+    try {
+      const result = await login(email, password)
 
-    if (result.success) {
-      router.push('/')
-    } else {
-      setError(result.error ?? 'Invalid email or password.')
+      if (result.success) {
+        router.push('/')
+      } else {
+        setError(result.error ?? 'Invalid email or password.')
+        void animateCard(cardScope.current, { x: [0, -6, 6, -4, 4, 0] }, { duration: 0.3 })
+      }
+    } finally {
       setIsLoading(false)
-      void animateCard(cardScope.current, { x: [0, -6, 6, -4, 4, 0] }, { duration: 0.3 })
     }
   }
 
@@ -234,29 +237,19 @@ export default function LoginPage() {
                       >
                         PASSWORD
                       </label>
-                      {/* Fix 2 — keyboard-accessible <button> replaces <span> */}
-                      <button
-                        type="button"
-                        onClick={() => {}}
+                      <span
+                        title="Password reset not available in this prototype"
+                        aria-label="Password reset (not available in prototype)"
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          padding: 0,
-                          cursor: 'pointer',
-                          color: 'var(--primary-main)',
+                          color: 'var(--text-muted)',
                           fontSize: '11px',
                           fontFamily: 'inherit',
-                          textDecoration: 'none',
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.textDecoration = 'underline'
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.textDecoration = 'none'
+                          cursor: 'default',
+                          userSelect: 'none',
                         }}
                       >
                         Forgot?
-                      </button>
+                      </span>
                     </div>
                     {/* Fix 4 — no onFocus/onBlur handlers; focus styles handled by CSS */}
                     <input

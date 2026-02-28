@@ -42,8 +42,8 @@ export default function RootLayout({
     >
       <body className="bg-bg-default text-text-primary font-body antialiased">
         <ThemeProvider>
+          <div className="scanline-overlay" aria-hidden="true" />
           <AuthProvider>
-            <div className="scanline-overlay" aria-hidden="true" />
             <AuthGuard>
               {children}
             </AuthGuard>

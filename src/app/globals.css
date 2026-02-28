@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── EASING TOKENS ─── */
+:root {
+  --ease-snap: cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
 /* ─── DARK THEME (default) ─── */
 :root,
 [data-theme="dark"] {
@@ -197,3 +202,21 @@ input:focus-visible {
 .logo-pulse {
   animation: logo-pulse 3s ease-in-out infinite;
 }
+
+/* ─── CARD GLOW HOVER ─── */
+.card-glow-hover {
+  position: relative;
+  overflow: hidden;
+}
+.card-glow-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--primary-main);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-snap);
+  pointer-events: none;
+}
+.card-glow-hover:hover::before { opacity: 0.25; }
+.card-glow-hover:hover { box-shadow: 0 0 30px rgba(255, 77, 0, 0.08); }

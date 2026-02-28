@@ -1,10 +1,13 @@
 'use client'
 
+import React from 'react'
+import type { CallStatus, ServiceType, UrgencyLevel } from '@/lib/mockData'
+
 export interface CallFilters {
   search: string
-  status: 'all' | 'Active' | 'Escalated' | 'Attention Needed'
-  service: 'all' | 'Towing' | 'Plumbing' | 'HVAC' | 'Electrical' | 'Locksmith'
-  urgency: 'all' | 'Critical' | 'High' | 'Medium' | 'Low'
+  status: CallStatus | 'all'
+  service: ServiceType | 'all'
+  urgency: UrgencyLevel | 'all'
 }
 
 export const DEFAULT_FILTERS: CallFilters = {
@@ -17,6 +20,18 @@ export const DEFAULT_FILTERS: CallFilters = {
 interface FilterToolbarProps {
   filters: CallFilters
   onChange: (filters: CallFilters) => void
+}
+
+const SELECT_STYLE: React.CSSProperties = {
+  height: 48,
+  padding: '0 12px',
+  background: 'var(--bg-input)',
+  border: '1px solid var(--border-subtle)',
+  borderRadius: 6,
+  color: 'var(--text-primary)',
+  fontFamily: 'var(--font-jetbrains)',
+  fontSize: 12,
+  cursor: 'pointer',
 }
 
 export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
@@ -52,8 +67,11 @@ export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
           placeholder="Search by name, vendor, location…"
           value={filters.search}
           onChange={e => onChange({ ...filters, search: e.target.value })}
+          aria-label="Search calls by name, vendor, or location"
+          autoComplete="off"
+          spellCheck={false}
           style={{
-            height: 40,
+            height: 48,
             width: '100%',
             paddingLeft: 36,
             paddingRight: 12,
@@ -73,17 +91,8 @@ export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
         onChange={e =>
           onChange({ ...filters, status: e.target.value as CallFilters['status'] })
         }
-        style={{
-          height: 40,
-          padding: '0 12px',
-          background: 'var(--bg-input)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 6,
-          color: 'var(--text-primary)',
-          fontFamily: 'var(--font-jetbrains)',
-          fontSize: 12,
-          cursor: 'pointer',
-        }}
+        aria-label="Filter by status"
+        style={SELECT_STYLE}
       >
         <option value="all">All Statuses</option>
         <option value="Active">Active</option>
@@ -97,17 +106,8 @@ export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
         onChange={e =>
           onChange({ ...filters, service: e.target.value as CallFilters['service'] })
         }
-        style={{
-          height: 40,
-          padding: '0 12px',
-          background: 'var(--bg-input)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 6,
-          color: 'var(--text-primary)',
-          fontFamily: 'var(--font-jetbrains)',
-          fontSize: 12,
-          cursor: 'pointer',
-        }}
+        aria-label="Filter by service type"
+        style={SELECT_STYLE}
       >
         <option value="all">All Services</option>
         <option value="Towing">Towing</option>
@@ -123,17 +123,8 @@ export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
         onChange={e =>
           onChange({ ...filters, urgency: e.target.value as CallFilters['urgency'] })
         }
-        style={{
-          height: 40,
-          padding: '0 12px',
-          background: 'var(--bg-input)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 6,
-          color: 'var(--text-primary)',
-          fontFamily: 'var(--font-jetbrains)',
-          fontSize: 12,
-          cursor: 'pointer',
-        }}
+        aria-label="Filter by urgency"
+        style={SELECT_STYLE}
       >
         <option value="all">All Urgency</option>
         <option value="Critical">Critical</option>
@@ -147,19 +138,9 @@ export function FilterToolbar({ filters, onChange }: FilterToolbarProps) {
         <button
           type="button"
           onClick={() => onChange(DEFAULT_FILTERS)}
-          style={{
-            height: 40,
-            padding: '0 12px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-jetbrains)',
-            fontSize: 11,
-            whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+          aria-label="Clear all filters"
+          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] focus-visible:text-[var(--text-primary)] transition-colors whitespace-nowrap font-mono text-[11px]"
+          style={{ height: 48, padding: '0 12px', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           × Clear all
         </button>

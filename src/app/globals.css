@@ -139,6 +139,8 @@ input:focus-visible {
   box-shadow: 0 0 0 1px var(--primary-main);
 }
 
+select:focus-visible { outline: none; border-color: var(--primary-main) !important; box-shadow: 0 0 0 1px var(--primary-main); }
+
 /* ─── BUTTON PRIMARY ─── */
 .btn-primary:hover { background-color: var(--primary-hover) !important; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
